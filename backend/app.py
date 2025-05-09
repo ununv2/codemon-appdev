@@ -51,7 +51,19 @@ def signup():
         return jsonify({ "uid": user.uid, "message": "User created" }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+@app.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users_ref = db.reference("users")
+        users_data = users_ref.get()
 
+        if users_data:
+            return jsonify(users_data), 200
+        else:
+            return jsonify({ "error": "No users found" }), 404
+
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 500
 @app.route("/user/<uid>", methods=["GET"])
 def get_user(uid):
     try:

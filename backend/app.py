@@ -76,113 +76,124 @@ def get_user(uid):
     except Exception as e:
         return jsonify({ "error": str(e) }), 500
     
-@app.route("/gain-xp", methods=["POST"])
-def gain_xp():
+@app.route("/users/<uid>/xp", methods=["PATCH"])
+def update_xp(uid):
     data = request.json
-    uid = data["uid"]
-    xp_gain = data["amount"]
+    try:
+        xp_gain = data.get("amount", 0)
+        ref = db.reference(f"users/{uid}")
+        user = ref.get()
 
-    ref = db.reference(f"users/{uid}")
-    user = ref.get()
+        xp = user["xp"] + xp_gain
+        level = xp // 100 + 1
+        hp = 100 + level * 10
+
+        ref.update({ "xp": xp, "level": level, "hp": hp })
+
+        return jsonify({ "xp": xp, "level": level, "hp": hp }), 200
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 400
+
+@app.route("/users/<uid>/coins", methods=["PATCH"])
+def update_coins(uid):
+    data = request.json
+    try:
+        amount = data.get("amount", 0)
+        ref = db.reference(f"users/{uid}")
+        user = ref.get()
+
+        coins = user["coins"] + amount
+        ref.update({ "coins": coins })
+
+        return jsonify({ "coins": coins }), 200
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 400
+
+@app.route("/users/<uid>/progress", methods=["PATCH"])
+def update_progress(uid):
+    data = request.json
+    topic = data.get("topic")
+    progress = data.get("progress")
+
+    try:
+        ref = db.reference(f"users/{uid}/progress")
+        ref.update({ topic: progress })
+        return jsonify({ topic: progress }), 200
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 400
+
+@app.route("/users/<uid>/battle", methods=["PATCH"])
+def update_battle(uid):
+    data = request.json
+    won = data.get("won")
+    time = data.get("time")
+
+    try:
+        ref = db.reference(f"users/{uid}")
+        user = ref.get()
+
+        new_wins = user["battle"]["won"] + (1 if won else 0)
+        new_losses = user["battle"]["lost"] + (0 if won == False else 0)
+        fastest = min(user["battle"]["fastest"], time)
+
+        ref.child("battle").update({
+            "won": new_wins,
+            "lost": new_losses,
+            "fastest": fastest
+        })
+
+        return jsonify({ "won": new_wins, "lost": new_losses, "fastest": fastest }), 200
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 400
     
-    xp = user["xp"] + xp_gain
-    new_level = xp // 100 + 1
-    new_hp = 100 + (new_level * 10)
-
-    ref.update({
-        "xp": xp,
-        "level": new_level,
-        "hp": new_hp
-    })
-
-    return jsonify({ "xp": xp, "level": new_level, "hp": new_hp })
-
-@app.route("/add-coins", methods=["POST"])
-def add_coins():
+@app.route("/users/<uid>/skins", methods=["PATCH"])
+def update_skin(uid):
     data = request.json
-    uid = data["uid"]
-    amount = data["amount"]
+    action = data.get("action")  # "equip" or "unlock"
+    skin = data.get("skin")
 
-    ref = db.reference(f"users/{uid}")
-    current = ref.get()
-    coins = current["coins"] + amount
-    ref.update({ "coins": coins })
-
-    return jsonify({ "coins": coins })
-
-@app.route("/update-progress", methods=["POST"])
-def update_progress():
-    data = request.json
-    uid = data["uid"]
-    topic = data["topic"]
-    progress = data["progress"]  # float between 0.0–1.0
-
-    ref = db.reference(f"users/{uid}/progress")
-    ref.update({ topic: progress })
-
-    return jsonify({ topic: progress })
-
-
-@app.route("/battle-result", methods=["POST"])
-def battle_result():
-    data = request.json
-    uid = data["uid"]
-    won = data["won"]  # boolean
-    time = data["time"]  # seconds
-
-    ref = db.reference(f"users/{uid}")
-    user = ref.get()
-
-    new_wins = user["battle"]["won"] + (1 if won else 0)
-    new_losses = user["battle"]["lost"] + (0 if won else 1)
-    fastest = min(user["battle"]["fastest"], time)
-
-    ref.child("battle").update({
-        "won": new_wins,
-        "lost": new_losses,
-        "fastest": fastest
-    })
-
-    return jsonify({ "won": new_wins, "lost": new_losses, "fastest": fastest })
-
-@app.route("/equip-skin", methods=["POST"])
-def equip_skin():
-    data = request.json
-    uid = data["uid"]
-    skin = data["skin"]
-
-    ref = db.reference(f"users/{uid}/inventory")
-    ref.update({ "equipped_skin": skin })
-
-    return jsonify({ "equipped_skin": skin })
-
-@app.route("/unlock-skin", methods=["POST"])
-def unlock_skin():
-    data = request.json
-    uid = data["uid"]
-    skin = data["skin"]
-
-    ref = db.reference(f"users/{uid}/inventory/skins")
-    ref.update({ skin: True })
-
-    return jsonify({ "unlocked": skin })
-
-@app.route("/delete-user", methods=["POST"])
-def delete_user():
-    data = request.json
-    uid = data["uid"]
+    try:
+        if action == "equip":
+            db.reference(f"users/{uid}/inventory").update({
+                "equipped_skin": skin
+            })
+            return jsonify({ "equipped_skin": skin }), 200
+        elif action == "unlock":
+            db.reference(f"users/{uid}/inventory/skins").update({
+                skin: True
+            })
+            return jsonify({ "unlocked": skin }), 200
+        else:
+            return jsonify({ "error": "Invalid action" }), 400
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 400
     
+@app.route("/users/<uid>/skins", methods=["PATCH"])
+def update_skin(uid):
+    data = request.json
+    action = data.get("action")  # "unlock" or "equip"
+    skin = data.get("skin")
+
+    try:
+        if action == "unlock":
+            db.reference(f"users/{uid}/inventory/skins").update({ skin: True })
+            return jsonify({ "unlocked": skin }), 200
+        elif action == "equip":
+            db.reference(f"users/{uid}/inventory").update({ "equipped_skin": skin })
+            return jsonify({ "equipped_skin": skin }), 200
+        else:
+            return jsonify({ "error": "Invalid action" }), 400
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 500
+
+@app.route("/users/<uid>", methods=["DELETE"])
+def delete_user(uid):
     try:
         auth.delete_user(uid)
-    except Exception as e:
-        return jsonify({"error": f"Auth error:  {str(e)}"}), 400
-    
-    try:
         db.reference(f"users/{uid}").delete()
-        return jsonify({"message": "User fully delted"}), 200
+        return jsonify({ "message": "User deleted" }), 200
     except Exception as e:
-        return jsonify({"error": f"DB error: {str(e)}"}), 500
-    
+        return jsonify({ "error": str(e) }), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

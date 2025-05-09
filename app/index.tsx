@@ -1,19 +1,35 @@
-import { Stack, Link } from 'expo-router';
+import { Stack, router } from 'expo-router';
+import { ActivityIndicator, Text, View,Button } from 'react-native'
+import LoginForm from '~/components/LoginForm';
+import { useAuth } from '~/context/auth';
 
-import { Button } from '~/components/Button';
-import { Container } from '~/components/Container';
-import { ScreenContent } from '~/components/ScreenContent';
+export default function Index() {
+  const { user, isLoading, signOut } = useAuth();
 
-export default function Home() {
+  if(isLoading){
+    return(
+      <>
+      <View className='flex-1 justify-center items-center'>
+        <ActivityIndicator />
+      </View>
+      </>
+    )
+  }
+
+  if(!user){
+    return (
+      <>
+        <LoginForm/>
+      </>
+    )
+  }
   return (
     <>
       <Stack.Screen options={{ title: 'Home' }} />
-      <Container>
-        <ScreenContent path="app/index.tsx" title="Home"></ScreenContent>
-        <Link href={{pathname:'/login'}} asChild>
-          <Button title='Login NOW'></Button>
-        </Link>
-      </Container>
+      <View className='h-screen w-screen justify-center items-center bg-white'>
+        <Text>{JSON.stringify(user)}</Text>
+        <Button title='Sign Out' onPress={() => signOut()} />
+      </View>
     </>
   );
 }

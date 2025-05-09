@@ -54,12 +54,108 @@ def signup():
 
 @app.route("/user/<uid>", methods=["GET"])
 def get_user(uid):
+    try:
+        user_ref = db.reference(f"users/{uid}")
+        user_data = user_ref.get()
+
+        if user_data:
+            return jsonify(user_data), 200
+        else:
+            return jsonify({ "error": "User not found" }), 404
+
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 500
+    
+@app.route("/gain-xp", methods=["POST"])
+def gain_xp():
+    data = request.json
+    uid = data["uid"]
+    xp_gain = data["amount"]
+
     ref = db.reference(f"users/{uid}")
-    data = ref.get()
-    if data:
-        return jsonify(data), 200
-    else:
-        return jsonify({"error": "User not found"}), 404
+    user = ref.get()
+    
+    xp = user["xp"] + xp_gain
+    new_level = xp // 100 + 1
+    new_hp = 100 + (new_level * 10)
+
+    ref.update({
+        "xp": xp,
+        "level": new_level,
+        "hp": new_hp
+    })
+
+    return jsonify({ "xp": xp, "level": new_level, "hp": new_hp })
+
+@app.route("/add-coins", methods=["POST"])
+def add_coins():
+    data = request.json
+    uid = data["uid"]
+    amount = data["amount"]
+
+    ref = db.reference(f"users/{uid}")
+    current = ref.get()
+    coins = current["coins"] + amount
+    ref.update({ "coins": coins })
+
+    return jsonify({ "coins": coins })
+
+@app.route("/update-progress", methods=["POST"])
+def update_progress():
+    data = request.json
+    uid = data["uid"]
+    topic = data["topic"]
+    progress = data["progress"]  # float between 0.0–1.0
+
+    ref = db.reference(f"users/{uid}/progress")
+    ref.update({ topic: progress })
+
+    return jsonify({ topic: progress })
+
+
+@app.route("/battle-result", methods=["POST"])
+def battle_result():
+    data = request.json
+    uid = data["uid"]
+    won = data["won"]  # boolean
+    time = data["time"]  # seconds
+
+    ref = db.reference(f"users/{uid}")
+    user = ref.get()
+
+    new_wins = user["battle"]["won"] + (1 if won else 0)
+    new_losses = user["battle"]["lost"] + (0 if won else 1)
+    fastest = min(user["battle"]["fastest"], time)
+
+    ref.child("battle").update({
+        "won": new_wins,
+        "lost": new_losses,
+        "fastest": fastest
+    })
+
+    return jsonify({ "won": new_wins, "lost": new_losses, "fastest": fastest })
+
+@app.route("/equip-skin", methods=["POST"])
+def equip_skin():
+    data = request.json
+    uid = data["uid"]
+    skin = data["skin"]
+
+    ref = db.reference(f"users/{uid}/inventory")
+    ref.update({ "equipped_skin": skin })
+
+    return jsonify({ "equipped_skin": skin })
+
+@app.route("/unlock-skin", methods=["POST"])
+def unlock_skin():
+    data = request.json
+    uid = data["uid"]
+    skin = data["skin"]
+
+    ref = db.reference(f"users/{uid}/inventory/skins")
+    ref.update({ skin: True })
+
+    return jsonify({ "unlocked": skin })
 
 
 if __name__ == "__main__":

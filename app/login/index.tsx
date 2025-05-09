@@ -14,7 +14,7 @@ export default function Login() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, username, password);
       console.log('Success', `Welcome back, ${userCredential.user.email}`);
-      router.replace('../home');
+      router.replace('../menu');
     } catch (error: any) {
       console.log('Login Failed', error.message);
     }
@@ -31,7 +31,7 @@ export default function Login() {
                     <Button title='Sign In' onPress={handleLogin}></Button>
 
                     <Text className="text-center mt-4">Dont have an account?</Text>
-                    <Button title="Go to Signup" onPress={() => router.push('/signup')} />
+                    <Button title="Go to Signup" onPress={() => router.push('./signup')} />
                 </View>
             </View>
         </>

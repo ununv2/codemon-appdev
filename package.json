@@ -27,6 +27,7 @@
     "expo-system-ui": "~5.0.6",
     "expo-web-browser": "~14.1.6",
     "firebase": "^10.5.2",
+    "flask": "^0.2.10",
     "nativewind": "latest",
     "react": "19.0.0",
     "react-dom": "19.0.0",

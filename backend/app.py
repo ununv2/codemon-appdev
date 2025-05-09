@@ -22,14 +22,9 @@ def home():
 def signup():
     data = request.json
     try:
-        user = auth.create_user(
-            email=data['email'],
-            password=data['password'],
-            display_name=data['name']
-        )
-
-        db.reference(f"users/{user.uid}").set({
-            "uid": user.uid,
+        uid = data["uid"]
+        db.reference(f"users/{uid}").set({
+            "uid": uid,
             "name": data["name"],
             "email": data["email"],
             "hp": 100,
@@ -48,23 +43,26 @@ def signup():
                 "equipped_skin": "default"
             },
         })
-        return jsonify({ "uid": user.uid, "message": "User created" }), 200
+        return jsonify({ "uid": uid, "message": "User created" }), 200
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-@app.route('/users', methods=['GET'])
-def get_users():
-    try:
-        users_ref = db.reference("users")
-        users_data = users_ref.get()
 
+@app.route("/users", methods=["GET"])
+def get_all_users():
+    try:
+        users_ref = db.reference(f"users")
+        users_data = users_ref.get()
+        
         if users_data:
             return jsonify(users_data), 200
         else:
-            return jsonify({ "error": "No users found" }), 404
-
+            return jsonify({"message": "No users found"}), 404
+    
     except Exception as e:
-        return jsonify({ "error": str(e) }), 500
-@app.route("/user/<uid>", methods=["GET"])
+        return jsonify({"error": str(e) }), 500
+
+@app.route("/users/<uid>", methods=["GET"])
 def get_user(uid):
     try:
         user_ref = db.reference(f"users/{uid}")
@@ -169,6 +167,22 @@ def unlock_skin():
 
     return jsonify({ "unlocked": skin })
 
+@app.route("/delete-user", methods=["POST"])
+def delete_user():
+    data = request.json
+    uid = data["uid"]
+    
+    try:
+        auth.delete_user(uid)
+    except Exception as e:
+        return jsonify({"error": f"Auth error:  {str(e)}"}), 400
+    
+    try:
+        db.reference(f"users/{uid}").delete()
+        return jsonify({"message": "User fully delted"}), 200
+    except Exception as e:
+        return jsonify({"error": f"DB error: {str(e)}"}), 500
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

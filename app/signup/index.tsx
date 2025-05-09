@@ -11,32 +11,38 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!email || !password || !name) {
-      Alert.alert('Missing Info', 'All fields are required.');
+      // Alert.alert('Missing Info', 'All fields are required.');
+      console.log('Missing Info');
       return;
     }
 
     try {
-      // Step 1: Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // Step 2: Call Flask API to create full profile in Firebase DB
-      const res = await fetch('http://<your-ip>:5000/signup', {
+      const response = await fetch('http://localhost:5000/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid, name, email })
+        body: JSON.stringify({
+          uid: uid,
+          email: email,
+          name: name
+        })
       });
 
-      const result = await res.json();
+      const result = await response.json();
 
-      if (res.ok) {
-        Alert.alert('Account Created', 'You can now log in.');
+      if (response.ok) {
+        // Alert.alert('Account Created', 'You can now log in.');
+        console.log('Account Created', 'You can now log in.');
         router.replace('/login');
       } else {
-        Alert.alert('Backend Error', result.error || 'Could not create profile.');
+        // Alert.alert('Backend Error', result.error || 'Could not create profile.');
+        console.log('Backend Error', result.error || 'Could not create profile.')
       }
     } catch (error: any) {
-      Alert.alert('Signup Failed', error.message);
+      // Alert.alert('Signup Failed', error.message);
+      console.log('Signup Failed', error.message)
     }
   };
 
@@ -82,7 +88,7 @@ export default function Signup() {
 
           <Button title="Sign Up" onPress={handleSignup} />
           <Text className="text-center mt-4">Already have an account?</Text>
-          <Button title="Go to Login" onPress={() => router.replace('/login')} />
+          <Button title="Go to Login" onPress={() => router.back()} />
         </View>
       </View>
     </>

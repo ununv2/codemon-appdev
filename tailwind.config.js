@@ -4,7 +4,16 @@ module.exports = {
 
   presets: [require('nativewind/preset')],
   theme: {
-    extend: {},
+    extend: {
+      colors:{
+        greyish:{
+          base: "#D8D5D5"
+        }
+      },
+      fontFamily: {
+        'press-start': ['PressStart2P', 'monospace']
+      },
+    },
   },
   plugins: [],
 };

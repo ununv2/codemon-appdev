@@ -17,6 +17,25 @@
         {
           "launchMode": "most-recent"
         }
+      ],
+      [
+        "expo-font", {
+          "fonts": [
+            "./assets/fonts/PressStart2P-Regular.ttf"
+          ],
+          "ios": {
+            "fonts": [
+              {
+                "fontFamily": "PressStart2P",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/PressStart2P-Regular.ttf"
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
     ],
     "experiments": {

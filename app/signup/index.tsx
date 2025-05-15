@@ -1,8 +1,11 @@
 import { Stack, router } from 'expo-router';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Alert, ImageBackground, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '~/utils/firebase';
 import { useState } from 'react';
+import Background from 'assets/background.png'
+import Logo from '~/components/Logo';
+import { SymbolView } from 'expo-symbols';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -11,7 +14,6 @@ export default function Signup() {
 
   const handleSignup = async () => {
     if (!email || !password || !name) {
-      // Alert.alert('Missing Info', 'All fields are required.');
       console.log('Missing Info');
       return;
     }
@@ -48,48 +50,36 @@ export default function Signup() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Sign Up' }} />
-      <View className="flex-1 justify-center bg-white px-6">
-        <View className="gap-4">
-          <Text className="text-2xl font-bold text-center">Create Account</Text>
+      <Stack.Screen options={{ title: 'Sign Up', headerShown: false }} />
+      <View className='flex-1 bg-white h-screen w-screen items-center justify-center'>
+        <ImageBackground source={Background} className='h-screen w-screen items-center justify-center' resizeMode='contain'>
+          <KeyboardAvoidingView behavior="padding" className='w-full flex-1'>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <View className='relative items-center justify-center z-20 translate-y-[-80px]'>
+                <Logo />
+              </View>
+              <View className='relative bg-greyish-base m-5 p-10 backdrop-opacity-80 rounded-[20px]'>
+                <View className={`flex-row mb-5 h-[48px] rounded-[20px] w-full border-solid active:border-blue-300 border-2 bg-white border-blue-100 text-[13px] items-center text-press-start ${(!email ? 'pl-6' : '')}`}>
+                  {<SymbolView
+                    name="person.fill"
+                    colors='#000000'
+                    size={25}
+                    style={{ opacity: email ? 0 : 1 }}
+                    tintColor='black'
+                  />}
+                  <TextInput
+                    className={`flex-1 text-center ${(email ? 'pr-12' : 'pr-6')} h-[48px]`}
+                    style={{ fontFamily: 'PressStart2P' }}
+                    placeholder='Username'
+                    value={email}
+                    onChangeText={(e) => setEmail(e)}
+                  />
 
-          <View>
-            <Text className="mb-1 text-base">Name</Text>
-            <TextInput
-              placeholder="Unun"
-              value={name}
-              onChangeText={setName}
-              className="border border-blue-200 rounded px-3 py-2 text-base"
-            />
-          </View>
-
-          <View>
-            <Text className="mb-1 text-base">Email</Text>
-            <TextInput
-              placeholder="email@example.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              className="border border-blue-200 rounded px-3 py-2 text-base"
-            />
-          </View>
-
-          <View>
-            <Text className="mb-1 text-base">Password</Text>
-            <TextInput
-              placeholder="********"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              className="border border-blue-200 rounded px-3 py-2 text-base"
-            />
-          </View>
-
-          <Button title="Sign Up" onPress={handleSignup} />
-          <Text className="text-center mt-4">Already have an account?</Text>
-          <Button title="Go to Login" onPress={() => router.back()} />
-        </View>
+                </View>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </ImageBackground>
       </View>
     </>
   );

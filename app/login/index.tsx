@@ -1,11 +1,13 @@
 import { Stack, router } from 'expo-router';
 // import {Container} from '~/components/Container'
-import { Text, TextInput, Button, View, KeyboardAvoidingView, ScrollView, ImageBackground, TouchableOpacity } from 'react-native'
+import { Text, TextInput, View, KeyboardAvoidingView, ScrollView, ImageBackground, TouchableOpacity } from 'react-native'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useState, useEffect } from 'react'
 import { auth } from '~/utils/firebase'
 import Background from 'assets/background.png'
-import { SFSymbol, SymbolView } from 'expo-symbols'
+import { SymbolView } from 'expo-symbols'
+import Logo from '~/components/Logo';
+import Button from '~/components/Button';
 
 export default function Login() {
     const [username, setUsername] = useState<string>('')
@@ -42,7 +44,7 @@ export default function Login() {
                     >
                         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <View className='relative items-center justify-center z-20 translate-y-[-80px]'>
-                                <Text className='text-[36px] text-yellow-400' style={{ fontFamily: 'PressStart2P' }}>CodeMon</Text>
+                                <Logo />
                             </View>
                             <View className='absolute h-[80px] w-[80px] items-center justify-center z-10 translate-y-[-210%] rounded-full bg-yellow-400'>
                                 <SymbolView
@@ -63,7 +65,7 @@ export default function Login() {
                                         tintColor='black'
                                     />}
                                     <TextInput
-                                        className={`flex-1 text-center ${(username ? 'pr-12' : 'pr-6')}`}
+                                        className={`flex-1 text-center h-[48px] ${(username ? 'pr-12' : 'pr-6')}`}
                                         style={{ fontFamily: 'PressStart2P' }}
                                         placeholder='Username'
                                         value={username}
@@ -73,12 +75,13 @@ export default function Login() {
                                 </View>
                                 <View className={`flex-row mb-5 h-[48px] rounded-[20px] w-full border-solid active:border-blue-300 border-2 bg-white border-blue-100 text-[13px] items-center text-press-start ${(!password ? 'pl-6' : '')}`}>
                                     <SymbolView name='lock.fill' size={25} style={{ opacity: password ? 0 : 1 }} tintColor='black' />
-                                    <TextInput className={`flex-1 ${(password ? 'pr-12' : 'pr-6')} text-center`} style={{ fontFamily: 'PressStart2P' }} placeholder='Password' onChangeText={(e) => setPassword(e)} secureTextEntry={true} keyboardType='email-address' />
+                                    <TextInput className={`flex-1 ${(password ? 'pr-12' : 'pr-6')} text-center h-[48px]`} style={{ fontFamily: 'PressStart2P' }} placeholder='Password' onChangeText={(e) => setPassword(e)} secureTextEntry={true} keyboardType='email-address' />
 
                                 </View>
                                 <View>
-                                    <TouchableOpacity className='w-auto h-[48px] rounded-[20px] border-solid bg-yellow-400 justify-center text-press-start mb-5' onPress={handleLogin}>
-                                        <Text style={{ fontFamily: 'PressStart2P' }} className='text-center text-[13px]' >Login</Text>
+                                    <TouchableOpacity className='w-auto h-[48px] justify-center text-press-start mb-5 items-center' onPress={handleLogin}>
+                                        {/* <Text style={{ fontFamily: 'PressStart2P' }} className='text-center text-[13px]' >Login</Text> */}
+                                        <Button label="Login"></Button>
                                     </TouchableOpacity>
                                 </View>
                                 <TouchableOpacity className='w-auto rounded-[20px] border-solid justify-center text-press-start'>

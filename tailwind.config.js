@@ -11,7 +11,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        'press-start': ['PressStart2P', 'monospace']
+        'press-start': ['PressStart2P', 'monospace'],
+        'vt323': ['VT323', 'monospace'],
       },
     },
   },

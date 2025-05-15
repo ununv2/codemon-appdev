@@ -21,7 +21,8 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/PressStart2P-Regular.ttf"
+            "./assets/fonts/PressStart2P-Regular.ttf",
+            "./assets/fonts/VT323-Regular.ttf"
           ]
         }
       ]

@@ -1,12 +1,15 @@
 import { Stack, router} from 'expo-router';
-import { auth } from '~/utils/firebase';
-import { Text, TextInput, View, ScrollView, ImageBackground, TouchableOpacity} from 'react-native'
+import { View, ScrollView, ImageBackground, TouchableOpacity} from 'react-native'
 import Background from 'assets/background.png'
 import Logo from '~/components/Logo';
-import Button from '~/components/Button';
+import BiggerButton from '~/components/BiggerButton';
+import { auth } from '~/utils/firebase';
 
 export default function index() {
-
+    const handdleSignout = () =>{
+        auth.signOut()
+        router.replace('/')
+    }
 
     
     return (
@@ -15,21 +18,20 @@ export default function index() {
             <View className='flex-1 bg-white h-screen w-screen items-center justify-center'>
                 <ImageBackground source={Background} className='h-screen w-screen items-center justify-center' resizeMode='contain'>
                     <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
-
                         <View className='relative items-center justify-center z-20 translate-y-[-80px]'>
                             <Logo />
                         </View>
                         <View className='flex flex-col gap-10'>
-                            <Button
+                            <BiggerButton
                                 onPress={() => router.push('../map')}
                                 label="Play Now"
                             />
-                            <Button
+                            <BiggerButton
                                 onPress={() => router.push('../stat')}
                                 label="Stats"
                             />
-                            <Button
-                                onPress={() => router.push('../exit')}
+                            <BiggerButton
+                                onPress={handdleSignout}
                                 label="Exit"
                             />
                         </View>

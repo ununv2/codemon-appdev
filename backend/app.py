@@ -31,17 +31,9 @@ def signup():
             "xp": 0,
             "level": 1,
             "coins": 0,
-            "progress": { "python": 0.0, "java": 0.0, "react": 0.0, "cs" : 0.0 },
+            "progress": { "python": 0, "java": 0, "react": 0, "cs" : 0 },
             "battle": { "won": 0, "lost": 0, "fastest": 9999 },
-            "inventory": {
-                "skins": {
-                    "default": True,
-                    "skin1": False,
-                    "skin2": False,
-                    "skin3": False
-                },
-                "equipped_skin": "default"
-            },
+            "skin" : data["skin"]
         })
         return jsonify({ "uid": uid, "message": "User created" }), 200
     
@@ -85,12 +77,11 @@ def update_xp(uid):
         user = ref.get()
 
         xp = user["xp"] + xp_gain
-        level = xp // 100 + 1
-        hp = 100 + level * 10
+        level = xp // 500 + 1
 
-        ref.update({ "xp": xp, "level": level, "hp": hp })
+        ref.update({ "xp": xp, "level": level})
 
-        return jsonify({ "xp": xp, "level": level, "hp": hp }), 200
+        return jsonify({ "xp": xp, "level": level}), 200
     except Exception as e:
         return jsonify({ "error": str(e) }), 400
 
@@ -113,12 +104,15 @@ def update_coins(uid):
 def update_progress(uid):
     data = request.json
     topic = data.get("topic")
-    progress = data.get("progress")
 
     try:
-        ref = db.reference(f"users/{uid}/progress")
-        ref.update({ topic: progress })
-        return jsonify({ topic: progress }), 200
+        ref = db.reference(f"users/{uid}/progress/{topic}")
+        current = ref.get() or 0
+        updated = current + 1
+
+        ref.set(updated)
+
+        return jsonify({ topic: updated }), 200
     except Exception as e:
         return jsonify({ "error": str(e) }), 400
 
@@ -126,63 +120,35 @@ def update_progress(uid):
 def update_battle(uid):
     data = request.json
     won = data.get("won")
-    time = data.get("time")
+    # time = data.get("time")
 
     try:
         ref = db.reference(f"users/{uid}")
         user = ref.get()
 
         new_wins = user["battle"]["won"] + (1 if won else 0)
-        new_losses = user["battle"]["lost"] + (0 if won == False else 0)
-        fastest = min(user["battle"]["fastest"], time)
+        new_losses = user["battle"]["lost"] + (1 if won == False else 0)
+        # fastest = min(user["battle"]["fastest"], time)
 
         ref.child("battle").update({
             "won": new_wins,
             "lost": new_losses,
-            "fastest": fastest
+            # "fastest": fastest
         })
 
-        return jsonify({ "won": new_wins, "lost": new_losses, "fastest": fastest }), 200
+        return jsonify({ "won": new_wins, "lost": new_losses}), 200
     except Exception as e:
         return jsonify({ "error": str(e) }), 400
     
 @app.route("/users/<uid>/skins", methods=["PATCH"])
 def update_skin(uid):
     data = request.json
-    action = data.get("action")  # "equip" or "unlock"
     skin = data.get("skin")
-
+    if skin not in ["unun", "matt"]:
+        return jsonify({ "error": "Invalid skin" }), 400
     try:
-        if action == "equip":
-            db.reference(f"users/{uid}/inventory").update({
-                "equipped_skin": skin
-            })
-            return jsonify({ "equipped_skin": skin }), 200
-        elif action == "unlock":
-            db.reference(f"users/{uid}/inventory/skins").update({
-                skin: True
-            })
-            return jsonify({ "unlocked": skin }), 200
-        else:
-            return jsonify({ "error": "Invalid action" }), 400
-    except Exception as e:
-        return jsonify({ "error": str(e) }), 400
-    
-@app.route("/users/<uid>/skins", methods=["PATCH"])
-def update_skin(uid):
-    data = request.json
-    action = data.get("action")  # "unlock" or "equip"
-    skin = data.get("skin")
-
-    try:
-        if action == "unlock":
-            db.reference(f"users/{uid}/inventory/skins").update({ skin: True })
-            return jsonify({ "unlocked": skin }), 200
-        elif action == "equip":
-            db.reference(f"users/{uid}/inventory").update({ "equipped_skin": skin })
-            return jsonify({ "equipped_skin": skin }), 200
-        else:
-            return jsonify({ "error": "Invalid action" }), 400
+        db.reference(f"users/{uid}/skin").set(skin)
+        return jsonify({ "skin": skin }), 200
     except Exception as e:
         return jsonify({ "error": str(e) }), 500
 
@@ -195,5 +161,29 @@ def delete_user(uid):
     except Exception as e:
         return jsonify({ "error": str(e) }), 500
 
+@app.route("/leaderboard", methods=["GET"])
+def leaderboard():
+    try:
+        ref = db.reference("users")
+        users = ref.get()
+
+        leaderboard = []
+        for uid, data in users.items():
+            leaderboard.append({
+                "uid": uid,
+                "name": data.get("name", "Unknown"),
+                "wins": data.get("battle", {}).get("won", 0),
+            })
+
+        # Sort by wins descending
+        leaderboard.sort(key=lambda x: x["wins"], reverse=True)
+        
+
+        return jsonify(leaderboard[:10]), 200
+    except Exception as e:
+        return jsonify({ "error": str(e) }), 500
+
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0",debug=True)

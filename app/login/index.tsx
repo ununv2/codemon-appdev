@@ -1,5 +1,4 @@
 import { Stack, router } from 'expo-router';
-// import {Container} from '~/components/Container'
 import { Text, TextInput, View, KeyboardAvoidingView, ScrollView, ImageBackground, TouchableOpacity } from 'react-native'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { useState, useEffect } from 'react'
@@ -54,11 +53,11 @@ export default function Login() {
                                     tintColor='white'
                                 />
                             </View>
-                            <View className='relative bg-greyish-base m-5 p-10 backdrop-opacity-80 rounded-[20px]'>
+                            <View className='relative bg-greyish-base m-5 p-10 backdrop-opacity-80 rounded-[20px] '>
                                 <Text className='text-center text-[20px] text-press-start m-5' style={{ fontFamily: 'PressStart2P' }}>Sign In</Text>
                                 <View className={`flex-row mb-5 h-[48px] rounded-[20px] w-full border-solid active:border-blue-300 border-2 bg-white border-blue-100 text-[13px] items-center text-press-start ${(!username ? 'pl-6' : '')}`}>
                                     {<SymbolView
-                                        name="person.fill"
+                                        name="envelope.fill"
                                         colors='#000000'
                                         size={25}
                                         style={{ opacity: username ? 0 : 1 }}
@@ -67,7 +66,7 @@ export default function Login() {
                                     <TextInput
                                         className={`flex-1 text-center h-[48px] ${(username ? 'pr-12' : 'pr-6')}`}
                                         style={{ fontFamily: 'PressStart2P' }}
-                                        placeholder='Username'
+                                        placeholder='Email'
                                         value={username}
                                         onChangeText={(e) => setUsername(e)}
                                     />
@@ -75,7 +74,7 @@ export default function Login() {
                                 </View>
                                 <View className={`flex-row mb-5 h-[48px] rounded-[20px] w-full border-solid active:border-blue-300 border-2 bg-white border-blue-100 text-[13px] items-center text-press-start ${(!password ? 'pl-6' : '')}`}>
                                     <SymbolView name='lock.fill' size={25} style={{ opacity: password ? 0 : 1 }} tintColor='black' />
-                                    <TextInput className={`flex-1 ${(password ? 'pr-12' : 'pr-6')} text-center h-[48px]`} style={{ fontFamily: 'PressStart2P' }} placeholder='Password' onChangeText={(e) => setPassword(e)} secureTextEntry={true} keyboardType='email-address' />
+                                    <TextInput className={`flex-1 ${(password ? 'pr-12' : 'pr-6')} text-center h-[48px]`} style={{ fontFamily: 'PressStart2P' }} placeholder='Password' onChangeText={(e) => setPassword(e)} secureTextEntry={true} />
 
                                 </View>
                                 <View>
